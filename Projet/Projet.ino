@@ -62,7 +62,7 @@ void setup() {
 // }
 
 
-// fonction d'affichage d'une piece
+// fonction d'affichage des pieces
 void afficherPiece(unsigned int tab[5][2]) {
   for(int i=0; i<4; i++) {
     tft.fillCircle(tab[i][0], tab[i][1],rayonPiece,TFT_YELLOW); // Dessin du cercle plein en jaune de la piece
@@ -84,7 +84,7 @@ void Gyroscope() {
 
   if(yBoule>yMax || yBoule<(rayonBoule+40) || xBoule>xMax || xBoule<rayonBoule) {
     start = false;
-    tft.fillCircle(xBoule, yBoule, rayonBoule, TFT_DARKGREY); // pour l4effacer du bord
+    tft.fillCircle(xBoule, yBoule, rayonBoule, TFT_DARKGREY); // pour l'effacer du bord
     return;
   }
   tft.fillCircle(xBoule, yBoule, rayonBoule, TFT_DARKGREY);
@@ -110,27 +110,26 @@ bool chronoCalcule() {
 void menu() {
   if(digitalRead(WIO_KEY_B) == LOW) {
     start = true;
+    tft.fillRect(0,40,320,226,TFT_DARKGREY);  // Rectangle du fond en gris
   }
   if(digitalRead(WIO_KEY_C) == LOW) {
     mode = (mode + 1)%3;
+
+    tft.fillRect(0,0,150,40,TFT_BLUE);  // Rectangle du bandeau de scores en bleu
     if(mode == 0) {
-      tft.fillRect(0,0,150,40,TFT_BLUE);  // Rectangle du bandeau de scores en bleu
       tft.drawString("novice", 10, 10); // affiche le texte en position (10, 10)
-      tft.fillRect(0,40,320,226,TFT_DARKGREY);  // Rectangle du bandeau de scores en bleu
       afficherPiece(tabPiecesNov);
     }
     if(mode == 1) {
-      tft.fillRect(0,0,150,40,TFT_BLUE);  // Rectangle du bandeau de scores en bleu
       tft.drawString("confirme", 10, 10); // affiche le texte en position (10, 10)
-      tft.fillRect(0,40,320,226,TFT_DARKGREY);  // Rectangle du bandeau de scores en bleu
       afficherPiece(tabPiecesCon);
     }
     if(mode == 2) {
-      tft.fillRect(0,0,150,40,TFT_BLUE);  // Rectangle du bandeau de scores en bleu
       tft.drawString("expert", 10, 10); // affiche le texte en position (10, 10)
-      tft.fillRect(0,40,320,226,TFT_DARKGREY);  // Rectangle du bandeau de scores en bleu
       afficherPiece(tabPiecesExp);
     }
+    tft.fillRect(0,40,320,226,TFT_DARKGREY);  // Rectangle du fond en gris
+
     start = false;
     delay(100);
   }
