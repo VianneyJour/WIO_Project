@@ -9,16 +9,15 @@ unsigned int  tabPiecesNov[5][2]={{170, 170}, {160, 105}, {100, 205}, {145, 120}
               tabPiecesExp[5][2]={{4, 138}, {2, 54}, {100, 69}, {45, 120}, {250, 120}}; // tableau des pieces du mode expert
 
 
-
-unsigned int xBoule=100, yBoule=100; // position x et y de départ de la boule
+const unsigned int xMax = 307, yMax = 226;
+unsigned int xBoule=xMax/2, yBoule=yMax/2; // position x et y de départ de la boule
 const unsigned int rayonBoule = 7, rayonPiece = 5; // rayon de la boule et des pieces
 const unsigned int vitesseBoule = 8; // vitesse de déplacement de la boule
 
 
 unsigned int mode = 0; 
 
-const unsigned int yMax = 226, xMax = 307; // gerer le bord du bandeau
-int chrono = 30000;
+int chrono = 30000, score = 0;
 bool time, start = false;
 
 
@@ -32,12 +31,14 @@ void setup() {
   tft.fillScreen(TFT_DARKGREY); // fond gris foncé
   tft.fillCircle(xBoule, yBoule, rayonBoule, TFT_RED); // Dessin de la boule en rouge
   tft.fillRect(0,0,320,40,TFT_BLUE);  // Rectangle du bandeau de scores en bleu
-  tft.setTextColor(TFT_BLACK); // couleur du text en noir
 
   // Paramétrage du giroscope :
   lis.begin(Wire1); 
   lis.setOutputDataRate(LIS3DHTR_DATARATE_25HZ); // Setting output data rage to 25Hz, can be set up tp 5kHz 
   lis.setFullScaleRange(LIS3DHTR_RANGE_2G); // Setting scale range to 2g, select from 2,4,8,16g
+  tft.setTextColor(TFT_BLACK); // couleur du text en noir
+  tft.setTextSize(2);
+  tft.drawString(String(score)+"pts", 150, 10);
 
 
   // Déclaration des capteurs :
@@ -83,7 +84,7 @@ void Gyroscope() {
 
   if(yBoule>yMax || yBoule<(rayonBoule+40) || xBoule>xMax || xBoule<rayonBoule) {
     start = false;
-    tft.fillCircle(xBoule, yBoule, rayonBoule, TFT_DARKGREY);
+    tft.fillCircle(xBoule, yBoule, rayonBoule, TFT_DARKGREY); // pour l4effacer du bord
     return;
   }
   tft.fillCircle(xBoule, yBoule, rayonBoule, TFT_DARKGREY);
@@ -136,6 +137,7 @@ void menu() {
 }
 
 void loop() {
+  //lancer un mode avant de lancer la game, c'est mieux
 
   menu();
   if(start) {
