@@ -17,7 +17,7 @@ const unsigned int vitesseBoule = 8; // vitesse de déplacement de la boule
 
 unsigned int mode = 0; 
 
-const unsigned int yMax = 226, xMax = 307;
+const unsigned int yMax = 226, xMax = 307; // gerer le bord du bandeau
 int chrono = 30000;
 bool time, start = false;
 
@@ -71,8 +71,8 @@ void afficherPiece(unsigned int tab[5][2]) {
 }
 
 bool colisions(int xPiece, int yPiece) {
-  distance = sqrt((xBoule - xPiece)^^2 + (yBoule - yPiece)^^2);
-  if(distance == 0) return true;
+  //distance = sqrt((xBoule - xPiece)^^2 + (yBoule - yPiece)^^2);
+  //if(distance == 0) return true;
   return false;
 }
 
@@ -83,6 +83,7 @@ void Gyroscope() {
 
   if(yBoule>yMax || yBoule<(rayonBoule+40) || xBoule>xMax || xBoule<rayonBoule) {
     start = false;
+    tft.fillCircle(xBoule, yBoule, rayonBoule, TFT_DARKGREY);
     return;
   }
   tft.fillCircle(xBoule, yBoule, rayonBoule, TFT_DARKGREY);
@@ -142,8 +143,8 @@ void loop() {
     if(time) {
       Gyroscope();
       
-      for(int i =0 ; i< 4; i++)
-       if(colision());
+    //  for(int i =0 ; i< 4; i++)
+    //   if(colision());
     }
   }
   else{
