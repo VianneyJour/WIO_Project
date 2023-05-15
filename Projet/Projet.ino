@@ -70,6 +70,12 @@ void afficherPiece(unsigned int tab[5][2]) {
   }
 }
 
+bool colisions(int xPiece, int yPiece) {
+  distance = sqrt((xBoule - xPiece)^^2 + (yBoule - yPiece)^^2);
+  if(distance == 0) return true;
+  return false;
+}
+
 void Gyroscope() {
   float x_values, y_values ;
   x_values = lis.getAccelerationX();
@@ -134,7 +140,10 @@ void loop() {
   if(start) {
     time = chronoCalcule();
     if(time) {
-    Gyroscope();
+      Gyroscope();
+      
+      for(int i =0 ; i< 4; i++)
+       if(colision());
     }
   }
   else{
