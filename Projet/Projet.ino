@@ -1,5 +1,6 @@
 #include "TFT_eSPI.h"
 #include "LIS3DHTR.h"
+#include <math.h>
 
 TFT_eSPI tft;
 LIS3DHTR<TwoWire> lis;
@@ -9,7 +10,7 @@ unsigned int  tabPiecesNov[5][2]={{170, 170}, {160, 105}, {100, 205}, {145, 120}
               tabPiecesExp[5][2]={{4, 138}, {2, 54}, {100, 69}, {45, 120}, {250, 120}}, //tableau des pieces du mode expert
               tabActuel[5][2]; //tableau du mode actuel
 
-const unsigned int xMax = 307, yMax = 226;
+const unsigned int xMax = 307, yMax = 229;
 unsigned int xBoule=xMax/2, yBoule=yMax/2; // position x et y de départ de la boule
 const unsigned int rayonBoule = 7, rayonPiece = 5; // rayon de la boule et des pieces
 const unsigned int vitesseBoule = 8; // vitesse de déplacement de la boule
@@ -61,16 +62,20 @@ void setup() {
 
 // fonction d'affichage des pieces
 void afficherPiece(unsigned int tab[5][2]) {
-  for(int i=0; i<4; i++) {
+  for(int i=0; i<5; i++) {
     tft.fillCircle(tab[i][0], tab[i][1],rayonPiece,TFT_YELLOW); // Dessin du cercle plein en jaune de la piece
     tft.drawCircle(tab[i][0], tab[i][1],rayonPiece,TFT_BLACK); // Contour noir sur la piece
+    tft.setTextSize(1);
     tft.drawString("$", (tab[i][0] - 2), (tab[i][1] - 3)); // Icon dollar sur le centre de la piece
+    tft.setTextSize(2);
   }
 }
 
 bool colisions(int xPiece, int yPiece) {
-  int distance = sqrt((xBoule - xPiece)^2 + (yBoule - yPiece)^2);
-  if(distance <= rayonBoule+rayonPiece) return true;
+  double distance = sqrt(sq(xPiece - xBoule) + sq(yPiece - yBoule));
+  if(distance <= (rayonBoule + rayonPiece)) {
+    return true;
+  }
   return false;
 }
 
@@ -79,8 +84,9 @@ void Gyroscope() {
   x_values = lis.getAccelerationX();
   y_values = lis.getAccelerationY();
 
-  if(yBoule>yMax || yBoule<(rayonBoule+40) || xBoule>xMax || xBoule<rayonBoule) {
+  if(yBoule>yMax || yBoule<(rayonBoule+43) || xBoule>xMax || xBoule<(rayonBoule+2)) {
     start = false;
+    tft.fillCircle(xBoule, yBoule, rayonBoule, TFT_DARKGREY);
     return;
   }
   tft.fillCircle(xBoule, yBoule, rayonBoule, TFT_DARKGREY);
@@ -105,7 +111,7 @@ bool chronoCalcule() {
 
 void copie_tableau(unsigned int tab[5][2])
 {
-  for(int i=0; i<4; i++) {
+  for(int i=0; i<5; i++) {
     tabActuel[i][0] = tab[i][0];
     tabActuel[i][1] = tab[i][1];
   }
@@ -113,15 +119,14 @@ void copie_tableau(unsigned int tab[5][2])
 
 bool victoire(unsigned int tab[5][2])
 {
-  for(int i=0; i<4; i++)
-    if(tab[i][0]!=0 || tab[i][1]!=0) return false;
+  for(int i=0; i<5; i++)
+    if(tab[i][0]!=1000 || tab[i][1]!=1000) return false;
   return true;
 }
 
 void menu() {
   if(digitalRead(WIO_KEY_B) == LOW) {
     start = true;
-    tft.fillRect(0,40,320,226,TFT_DARKGREY);  // Rectangle du fond en gris
   }
   if(digitalRead(WIO_KEY_C) == LOW) {
     mode = (mode + 1)%3;
@@ -139,8 +144,8 @@ void menu() {
       tft.drawString("expert", 10, 10); // affiche le texte en position (10, 10)
       copie_tableau(tabPiecesExp);
     }
-    afficherPiece(tabActuel);
     tft.fillRect(0,40,320,226,TFT_DARKGREY);  // Rectangle du fond en gris
+    afficherPiece(tabActuel);
 
     start = false;
     delay(100);
@@ -149,19 +154,21 @@ void menu() {
 
 void loop() {
   //lancer un mode avant de lancer la game, c'est mieux
-  menu();
 
   if(start) {
     if(chronoCalcule()) {
       Gyroscope();
       
-      for(int i =0 ; i< 4; i++)
+      for(int i =0 ; i< 5; i++)
       {
-        if(colision(tabActuel[i][0], [i][1]))
+        if(colisions(tabActuel[i][0], tabActuel[i][1]))
         {
-          tft.fillCircle(tab[i][0], tab[i][1],rayonPiece,TFT_DARKGREY); // Dessin du cercle plein en gris pour cacher la piece
+          tft.fillCircle(tabActuel[i][0], tabActuel[i][1],rayonPiece,TFT_DARKGREY); // Dessin du cercle plein en gris pour cacher la piece
           score = score + 10;
-          tabActuel[i] = {0,0}
+          tft.fillRect(150, 10, 60, 25, TFT_BLUE);
+          tft.drawString(String(score)+"pts", 150, 10);
+          tabActuel[i][0] = 1000;
+          tabActuel[i][1] = 1000;
         }
       }
 
@@ -169,10 +176,13 @@ void loop() {
       {
         start = false;
         score = score + chrono/1000;
+        tft.fillRect(150, 10, 60, 25, TFT_BLUE);
+        tft.drawString(String(score)+"pts", 150, 10);
       }
     }
   }
   else{
+    menu();
     chrono = 30000;
     xBoule=100;
     yBoule=100;
