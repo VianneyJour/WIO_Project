@@ -5,24 +5,22 @@
 TFT_eSPI tft;
 LIS3DHTR<TwoWire> lis;
 
-
 // est ce qu'on met des unsigned in au i des fonctions ????
 //pk on fait plusieurs fois la copie de tableau ?? Pas opti 
 // Pk on met notre tab de noires dans tab actuel de noires alors qu'on en a qu'un ???
 // mettre une seule variable de nb de pieces et pieces noires ??? car sinons pose pb apres ! ou separer les if de collisions
 //fait clignoter les pièces rapidement a verifier !!
-
-
-
-// Déclaration des trois tableau de pieces, du tableau de boules noires et des deux tableau que nous utiliseronsdans le programme
-unsigned int  tabPiecesNov[5][2]={{170, 170}, {160, 105}, {100, 205}, {145, 120}, {130, 220}}, // tableau des pieces du mode novice
-              tabPiecesCon[5][2]={{4, 100}, {2, 46}, {100, 80}, {45, 120}, {250, 120}}, // tableau des pieces du mode confirmé
-              tabPiecesExp[5][2]={{4, 138}, {2, 54}, {100, 69}, {45, 120}, {250, 120}}, //tableau des pieces du mode expert
-              tabPiecesNoires[5][2]={{60, 138}, {50, 54}, {100, 90}, {45,200}, {250, 20}}, //tableau des pieces noires du mode expert
-              tabActuel[5][2], // tableau du mode actuel
-              tabActuelNoir[5][2]; //tableau de pieces noires du mode actuel
+//faire des variables pour les couleurs
 
 const unsigned int nbPiecesTab = 5, nbPiecesNoiresTab = 5;
+
+// Déclaration des trois tableau de pieces, du tableau de boules noires et des deux tableau que nous utiliseronsdans le programme
+unsigned int  tabPiecesNov[nbPiecesTab][2]={{170, 170}, {160, 105}, {100, 205}, {145, 120}, {130, 220}}, // tableau des pieces du mode novice
+              tabPiecesCon[nbPiecesTab][2]={{4, 100}, {2, 46}, {100, 80}, {45, 120}, {250, 120}}, // tableau des pieces du mode confirmé
+              tabPiecesExp[nbPiecesTab][2]={{4, 138}, {2, 54}, {100, 69}, {45, 120}, {250, 120}}, //tableau des pieces du mode expert
+              tabPiecesNoires[nbPiecesNoiresTab][2]={{60, 138}, {50, 54}, {100, 90}, {45,200}, {250, 20}}, //tableau des pieces noires du mode expert
+              tabActuel[nbPiecesTab][2], // tableau du mode actuel
+              tabActuelNoir[nbPiecesNoiresTab][2]; //tableau de pieces noires du mode actuel
 
 const unsigned int xMax = 307, yMax = 229; // valeurs maximales de l'écran
 unsigned int xBoule=xMax/2, yBoule=yMax/2; // position x et y de départ de la boule
@@ -34,7 +32,6 @@ unsigned int mode = 2; // declaration de la variable permettant de gerer le mode
 unsigned int chrono = 30000, score = 0; // declaration de la variable de temps de jeu (chrono) et du score initialise a 0
 unsigned int tempsBipper = 0; // variable du temps de buzzer des pieces
 bool start = false, bonus=true; // declaration des booleen de depart du jeu et du bouton bonus de temps
-
 
 void setup() {
   tft.begin();
@@ -59,7 +56,6 @@ void setup() {
   delay(20);// delay permettant d'afficher le mot de preparation
   tft.fillRect(0,0,320,40,TFT_BLUE);  // Rectangle du bandeau permettant d'effacer le mot de preparation
 
-
   // Déclaration des capteurs :
   pinMode(WIO_KEY_A, INPUT_PULLUP); // Déclaration du bouton A en INPUT
   pinMode(WIO_KEY_B, INPUT_PULLUP); // Déclaration du bouton B en INPUT
@@ -74,9 +70,8 @@ void depart() {
   analogWrite(WIO_BUZZER, 0); // buzzer eteint
 }
 
-
 // fonction d'affichage des pieces
-void afficherPiece(unsigned int tab[5][2]) {
+void afficherPiece(unsigned int tab[nbPiecesTab][2]) {
   for(int i=0; i<nbPiecesTab; i++) { // parcours des pieces du tableau
     tft.fillCircle(tab[i][0], tab[i][1],rayonPiece,TFT_YELLOW); // Dessin du cercle plein en jaune de la piece
     tft.drawCircle(tab[i][0], tab[i][1],rayonPiece,TFT_BLACK); // Contour noir sur la piece
@@ -87,7 +82,7 @@ void afficherPiece(unsigned int tab[5][2]) {
 }
 
 // fonction d'affichage des pieces noires
-void afficherPiecesNoires(unsigned int tab[5][2]) {
+void afficherPiecesNoires(unsigned int tab[nbPiecesNoiresTab][2]) {
   for(int i=0; i<nbPiecesNoiresTab; i++) { // parcours du tableau des pieces noires
     tft.fillCircle(tab[i][0], tab[i][1],rayonPieceNoire,TFT_BLACK); // Dessin du cercle plein en noir
   }
@@ -114,6 +109,12 @@ void Gyroscope() {
     score = 0; // on definie le score a 0
     tft.fillRect(150, 10, 60, 25, TFT_BLUE); // on actualise le score a l'ecran
     tft.drawString(String(score)+"pts", 150, 10); // on actualise le score a l'ecran
+    tone(WIO_BUZZER, 450, 300); // son de défaite
+    delay(300); // son de défaite
+    tone(WIO_BUZZER, 350, 300); // son de défaite
+    delay(300); // son de défaite
+    tone(WIO_BUZZER, 250, 300); // son de défaite
+    delay(300); // son de défaite
     return; // sort de la fonction
   }
   tft.fillCircle(xBoule, yBoule, rayonBoule, TFT_DARKGREY); // sinon on efface la boule pour actualiser ses coordonnées
@@ -138,7 +139,7 @@ bool chronoCalcule() {
 }
 
 // fonction de copie du tableau
-void copie_tableau(unsigned int tab[5][2])
+void copie_tableau(unsigned int tab[nbPiecesTab][2])
 {
   for(int i=0; i<nbPiecesTab; i++) { // pour toutes les pieces du tableau :
     tabActuel[i][0] = tab[i][0]; // on recopie les abscices dans le tableau actuel
@@ -147,7 +148,7 @@ void copie_tableau(unsigned int tab[5][2])
 }
 
 // fonction de copie du tableau
-void copie_tableauNoir(unsigned int tab[5][2])
+void copie_tableauNoir(unsigned int tab[nbPiecesNoiresTab][2])
 {
   for(int i=0; i<nbPiecesNoiresTab; i++) { // pour toutes les pieces noires du tableau :
     tabActuelNoir[i][0] = tab[i][0]; // on recopie les abscices dans le tableau actuel des pieces noires
@@ -156,7 +157,7 @@ void copie_tableauNoir(unsigned int tab[5][2])
 }
 
 // fonction des victoires
-bool victoire(unsigned int tab[5][2])
+bool victoire(unsigned int tab[nbPiecesTab][2])
 {
   for(int i=0; i<nbPiecesTab; i++) // pour toutes les pieces du tableau :
     if(tab[i][0]!=1000 || tab[i][1]!=1000) return false; // on verifie si elles ont bien été touché et donc deplacer, si oui on retourne faux
@@ -165,7 +166,7 @@ bool victoire(unsigned int tab[5][2])
 
 //fonction du menu
 void menu() {
-  if(digitalRead(WIO_KEY_B) == LOW) { // si la bouton B est appuyé :
+  if(digitalRead(WIO_KEY_B) == LOW) { // si le bouton B est appuyé :
     start = true; // on active le jeu
     score = 0; // on initialise les scores a 0
     tft.fillRect(150, 10, 60, 25, TFT_BLUE); // on actualise les scores a l'ecran
@@ -187,7 +188,7 @@ void menu() {
     depart(); // commencer le jeu
   }
 
-  if(digitalRead(WIO_KEY_C) == LOW) { // si la bouton C est appuyé :
+  if(digitalRead(WIO_KEY_C) == LOW) { // si le bouton C est appuyé :
     mode = (mode + 1)%3;
 
     tft.fillRect(0,0,150,40,TFT_BLUE);  // Rectangle du bandeau de scores en bleu
@@ -224,14 +225,13 @@ void bip() {
   }
 }
 
-
 void loop() {
   bip(); // fonction de bip qui permet d'eteindre le son du buzzer toutes les secondes
   if(start) { // si le jeu commence :
     if(chronoCalcule()) { // si le chrono est actif :
       Gyroscope(); // on active le gyroscope
       
-      for(int i =0 ; i< 5; i++) // pour toutes les valeurs du tableau actuel de pieces et de pieces noires :
+      for(int i =0 ; i< nbPiecesTab; i++) // pour toutes les valeurs du tableau actuel de pieces et de pieces noires :
       {
         if(colisions(tabActuel[i][0], tabActuel[i][1])) // s'il y a une collision avec les valeurs du tableau actuel en i alors :
         {
@@ -257,7 +257,7 @@ void loop() {
       if(victoire(tabActuel)) // si victoire (plus aucune piece sur l'ecran) alors :
       {
         start = false; // fin de jeu
-        if(bonus) score = score + chrono/1000; // ajout du temps au score si le bonus n'a pas ete untilise
+        if(bonus) score = score + chrono/1000; // ajout du temps au score si le bonus n'a pas ete utilise
         tft.fillRect(150, 10, 60, 25, TFT_BLUE); // actualisation du score a l'ecran
         tft.drawString(String(score)+"pts", 150, 10); // actualisation du score a l'ecran
         tone(WIO_BUZZER, 250, 300); // son de victoire
@@ -273,7 +273,15 @@ void loop() {
         bonus = false; // marquer l'utilisation du bonus
       }
     }
-    else start = false; // sinon arreter le jeu
+    else
+    {
+      start = false; // sinon arreter le jeu
+      analogWrite(WIO_BUZZER, 1);
+      delay(400);
+      analogWrite(WIO_BUZZER, 1);
+      delay(400);
+      analogWrite(WIO_BUZZER, 1);
+    }
   }
   else{ // sinon si le jeu ne commence pas alors :
     menu(); // appel a la fonction menu
