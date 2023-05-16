@@ -55,13 +55,9 @@ void setup() {
 }
 
 void depart() {
-  // if(go == 3000) {
-  //   analogWrite(WIO_BUZZER, 128);
-  // }
-  // if(go == 3500) {
-  //   analogWrite(WIO_BUZZER, 0);
-  // }
-  // go = millis();
+  analogWrite(WIO_BUZZER, 128);
+  delay(1000);
+  analogWrite(WIO_BUZZER, 0);
 }
 
 
@@ -168,6 +164,7 @@ void menu() {
       afficherPiecesNoires(tabActuelNoir);
     }
     bonus = true;
+    depart();
   }
 
   if(digitalRead(WIO_KEY_C) == LOW) {
