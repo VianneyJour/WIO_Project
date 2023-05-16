@@ -6,21 +6,18 @@ LIS3DHTR<TwoWire> lis;
 
 unsigned int  tabPiecesNov[5][2]={{170, 170}, {160, 105}, {100, 205}, {145, 120}, {130, 220}}, // tableau des pieces du mode novice
               tabPiecesCon[5][2]={{4, 100}, {2, 46}, {100, 80}, {45, 120}, {250, 120}}, // tableau des pieces du mode confirmé
-              tabPiecesExp[5][2]={{4, 138}, {2, 54}, {100, 69}, {45, 120}, {250, 120}}; // tableau des pieces du mode expert
-
+              tabPiecesExp[5][2]={{4, 138}, {2, 54}, {100, 69}, {45, 120}, {250, 120}}, //tableau des pieces du mode expert
+              tabActuel[5][2]; //tableau du mode actuel
 
 const unsigned int xMax = 307, yMax = 226;
 unsigned int xBoule=xMax/2, yBoule=yMax/2; // position x et y de départ de la boule
 const unsigned int rayonBoule = 7, rayonPiece = 5; // rayon de la boule et des pieces
 const unsigned int vitesseBoule = 8; // vitesse de déplacement de la boule
 
-
-unsigned int mode = 0; 
+unsigned int mode = 2; 
 
 int chrono = 30000, score = 0;
-bool time, start = false;
-
-
+bool start = false;
 
 void setup() {
   tft.begin();
@@ -72,8 +69,8 @@ void afficherPiece(unsigned int tab[5][2]) {
 }
 
 bool colisions(int xPiece, int yPiece) {
-  //distance = sqrt((xBoule - xPiece)^^2 + (yBoule - yPiece)^^2);
-  //if(distance == 0) return true;
+  int distance = sqrt((xBoule - xPiece)^2 + (yBoule - yPiece)^2);
+  if(distance <= rayonBoule+rayonPiece) return true;
   return false;
 }
 
@@ -84,7 +81,6 @@ void Gyroscope() {
 
   if(yBoule>yMax || yBoule<(rayonBoule+40) || xBoule>xMax || xBoule<rayonBoule) {
     start = false;
-    tft.fillCircle(xBoule, yBoule, rayonBoule, TFT_DARKGREY); // pour l'effacer du bord
     return;
   }
   tft.fillCircle(xBoule, yBoule, rayonBoule, TFT_DARKGREY);
@@ -107,6 +103,21 @@ bool chronoCalcule() {
   return true;
 }
 
+void copie_tableau(unsigned int tab[5][2])
+{
+  for(int i=0; i<4; i++) {
+    tabActuel[i][0] = tab[i][0];
+    tabActuel[i][1] = tab[i][1];
+  }
+}
+
+bool victoire(unsigned int tab[5][2])
+{
+  for(int i=0; i<4; i++)
+    if(tab[i][0]!=0 || tab[i][1]!=0) return false;
+  return true;
+}
+
 void menu() {
   if(digitalRead(WIO_KEY_B) == LOW) {
     start = true;
@@ -118,16 +129,17 @@ void menu() {
     tft.fillRect(0,0,150,40,TFT_BLUE);  // Rectangle du bandeau de scores en bleu
     if(mode == 0) {
       tft.drawString("novice", 10, 10); // affiche le texte en position (10, 10)
-      afficherPiece(tabPiecesNov);
+      copie_tableau(tabPiecesNov);
     }
     if(mode == 1) {
       tft.drawString("confirme", 10, 10); // affiche le texte en position (10, 10)
-      afficherPiece(tabPiecesCon);
+      copie_tableau(tabPiecesCon);
     }
     if(mode == 2) {
       tft.drawString("expert", 10, 10); // affiche le texte en position (10, 10)
-      afficherPiece(tabPiecesExp);
+      copie_tableau(tabPiecesExp);
     }
+    afficherPiece(tabActuel);
     tft.fillRect(0,40,320,226,TFT_DARKGREY);  // Rectangle du fond en gris
 
     start = false;
@@ -137,15 +149,27 @@ void menu() {
 
 void loop() {
   //lancer un mode avant de lancer la game, c'est mieux
-
   menu();
+
   if(start) {
-    time = chronoCalcule();
-    if(time) {
+    if(chronoCalcule()) {
       Gyroscope();
       
-    //  for(int i =0 ; i< 4; i++)
-    //   if(colision());
+      for(int i =0 ; i< 4; i++)
+      {
+        if(colision(tabActuel[i][0], [i][1]))
+        {
+          tft.fillCircle(tab[i][0], tab[i][1],rayonPiece,TFT_DARKGREY); // Dessin du cercle plein en gris pour cacher la piece
+          score = score + 10;
+          tabActuel[i] = {0,0}
+        }
+      }
+
+      if(victoire(tabActuel))
+      {
+        start = false;
+        score = score + chrono/1000;
+      }
     }
   }
   else{
