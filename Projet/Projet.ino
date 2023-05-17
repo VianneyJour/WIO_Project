@@ -1,3 +1,8 @@
+/* Authors
+    Vianney Jourdy
+    Antoine Perederii
+*/
+
 #include "TFT_eSPI.h"
 #include "LIS3DHTR.h"
 #include <math.h>
@@ -11,8 +16,6 @@ LIS3DHTR<TwoWire> lis;
 #define couleurPieces TFT_YELLOW // Declaration de la couleur des pieces
 #define couleurPiecesNoires TFT_BLACK // Declaration de la couleur des pieces noires
 #define couleurPolice TFT_BLACK // Declaration de la couleur de la police d'ecriture
-
-// mettre une seule variable de nb de pieces et pieces noires ??? car sinons pose pb apres ! ou separer les if de collisions
 
 const unsigned int nbPiecesTab = 5, nbPiecesNoiresTab = 5;
 
@@ -29,7 +32,7 @@ unsigned int xBoule=xMax/2, yBoule=yMax/2; // position x et y de départ de la b
 const unsigned int rayonBoule = 7, rayonPiece = 5, rayonPieceNoire = 5; // rayon de la boule, des pieces et des pieces noires
 const unsigned int vitesseBoule = 13; // vitesse de déplacement de la boule
 
-unsigned int mode = 2; // declaration de la variable permettant de gerer le mode de jeu (novice, confirme et expert) 
+int mode = -1; // declaration de la variable permettant de gerer le mode de jeu (novice, confirme et expert) 
 
 int chrono = 30000, score = 0; // declaration de la variable de temps de jeu (chrono) et du score initialise a 0
 unsigned int i; // iterateur pour les boucles for
@@ -167,7 +170,7 @@ bool victoire(unsigned int tab[nbPiecesTab][2])
 
 //fonction du menu
 void menu() {
-  if(digitalRead(WIO_KEY_B) == LOW) { // si le bouton B est appuyé :
+  if(digitalRead(WIO_KEY_B) == LOW && mode >=0) { // si le bouton B est appuyé :
     start = true; // on active le jeu
     score = 0; // on initialise les scores a 0
     tft.fillRect(150, 10, 60, 25, couleurBandeau); // on actualise les scores a l'ecran
@@ -250,11 +253,11 @@ void loop() {
         if(bonus) score = score + chrono/1000; // ajout du temps au score si le bonus n'a pas ete utilise
         tft.fillRect(150, 10, 60, 25, couleurBandeau); // actualisation du score a l'ecran
         tft.drawString(String(score)+"pts", 150, 10); // actualisation du score a l'ecran
-        tone(WIO_BUZZER, 10, 300); // son de victoire
+        tone(WIO_BUZZER, 900, 300); // son de victoire
         delay(300); // son de victoire
-        tone(WIO_BUZZER, 10, 300); // son de victoire
+        tone(WIO_BUZZER, 1100, 300); // son de victoire
         delay(300); // son de victoire
-        tone(WIO_BUZZER, 10, 300); // son de victoire
+        tone(WIO_BUZZER, 800, 300); // son de victoire
         delay(300); // son de victoire
       }
 
